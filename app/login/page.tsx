@@ -6,9 +6,32 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 import LoginImage from "../assets/images/login-image.png"
+import axios from "axios";
 
 export default function Login() {
+  const [username, setUsername] = useState<string>("")
+  const [password, setPassword] = useState<string>("")
+
   const [passwordShown, setPasswordShown] = useState<boolean>(true)
+
+  async function handleLogin() {
+    try {
+      const response = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + "user/login", {
+          username, password
+      });
+
+      if(response.status == 200 || response.status == 201){
+        location.href = "/home"
+      } else {
+
+      }
+
+      // console.log("Full response:", response);
+      // console.log("Data only:", response.data);
+    } catch (error: any) {
+      console.log("Error response:", error?.response);
+    }
+  }
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-white font-sans dark:bg-black">
@@ -23,10 +46,10 @@ export default function Login() {
               <h3>LOGIN</h3>
               <p className="text-sm" >Selamat datang, silahkan masukkan username dan password anda!</p>
               <div className="input-group mb-3">
-                <input type="text" className="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1" />
+                <input onChange={(e) => setUsername(e.target.value)} type="text" className="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1" />
               </div>
               <div className="input-group mb-3">
-                <input type={passwordShown ? "password" : "text"} className="form-control" placeholder="Password" aria-label="Password" aria-describedby="basic-addon1" />
+                <input onChange={(e) => setPassword(e.target.value)} type={passwordShown ? "password" : "text"} className="form-control" placeholder="Password" aria-label="Password" aria-describedby="basic-addon1" />
                 <div className="input-group-prepend" onClick={() => { setPasswordShown(!passwordShown) }} >
                   {passwordShown ? (
                     <span className="input-group-text h-100" id="basic-addon1"><FiEye /></span>) :
@@ -35,10 +58,10 @@ export default function Login() {
                 </div>
               </div>
             </div>
-            <button onClick={() => {location.href = "/home"}} type="button" className="btn-main w-100">Login</button>
+            <button onClick={() => { handleLogin() }} type="button" className="btn-main w-100">Login</button>
           </div>
           <div className="flex-1" >
-            <Image alt="login image" src={LoginImage} style={{ width: "100%", height: "100%" }} />
+            <Image loading="eager" alt="login image" src={LoginImage} style={{ width: "100%", height: "100%" }} />
           </div>
         </div>
       </main>
