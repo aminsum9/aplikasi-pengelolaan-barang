@@ -22,6 +22,7 @@ export default function Login() {
 
       if(response.status == 200 || response.status == 201){
         localStorage.setItem("token",response?.data?.data?.token)
+        localStorage.setItem("api_token",response?.data?.token)
         localStorage.setItem("username",response?.data?.data?.username)
         localStorage.setItem("name",response?.data?.data?.name)
         location.href = "/home"

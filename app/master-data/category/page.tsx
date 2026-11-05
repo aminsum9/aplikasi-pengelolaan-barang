@@ -1,25 +1,128 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import FilterDropdown from "../../components/ui/dropdown"
 import PageLayout from "../../components/ui/page-layout"
 import { BsPlus } from "react-icons/bs"
 import { BiPencil, BiSearch, BiTrash } from "react-icons/bi"
 import { FcDocument } from "react-icons/fc"
+import axios from "axios"
 
-interface Item {
-    value: string
+interface Category {
+    id: number
+    code: string
     name: string
 }
 
-const dummyCategories: Item[] = [
-    { value: "1", name: "smartphone" },
-    { value: "2", name: "televisi" }
-]
-
 export default function Category() {
-    const [selectedCategory, setSelectedCategory] = useState<string>("")
+    const [selectedItem, setSelectedItem] = useState<Category>({
+        id: 0,
+        code: "",
+        name: ""
+    })
+    const [newData, setNewData] = useState<{ code: string, name: string }>({
+        code: "",
+        name: ""
+    })
+    const [data, setData] = useState<Category[] | []>([])
+    const [page, setPage] = useState<number>(1)
     const [isOpen, setIsOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+
+    useEffect(() => {
+        handleGetData()
+    }, [])
+
+    async function handleGetData() {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.get(process.env.NEXT_PUBLIC_BASE_URL + "category/get-all?page=" + page, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                }
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                setData(response?.data?.data || [])
+            } else {
+
+            }
+        } catch (error: any) {
+            console.log("Error response:", error?.response);
+        }
+    }
+
+    async function handleAddData() {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + "category/add", {
+                code: newData?.code,
+                name: newData?.name,
+            }, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                },
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                handleGetData()
+                setIsOpen(false)
+                setNewData({ code: "", name: "" })
+            } else {
+
+            }
+        } catch (error: any) {
+            setIsOpen(false)
+            console.log("Error response:", error?.response);
+        }
+    }
+
+    async function handleEditData() {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.put(process.env.NEXT_PUBLIC_BASE_URL + "category/update", {
+                id: selectedItem?.id,
+                code: selectedItem?.code,
+                name: selectedItem?.name,
+            }, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                },
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                handleGetData()
+                setIsEditOpen(false)
+                setSelectedItem({id: 0, code: "", name: "" })
+            } else {
+
+            }
+        } catch (error: any) {
+            setIsOpen(false)
+            console.log("Error response:", error?.response);
+        }
+    }
+
+    async function handleDeleteData(id: number) {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.delete(process.env.NEXT_PUBLIC_BASE_URL + "category/delete/" + id, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                },
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                handleGetData()
+                setIsOpen(false)
+            } else {
+
+            }
+        } catch (error: any) {
+            setIsOpen(false)
+            console.log("Error response:", error?.response);
+        }
+    }
 
     return (
         <PageLayout>
@@ -51,23 +154,28 @@ export default function Category() {
                         <thead>
                             <tr>
                                 <td className="text-sm text-center" >NO</td>
-                                <td className="text-sm text-center" >ACTION</td>
+                                <td className="text-sm text-center" width={100} >ACTION</td>
                                 <td className="text-sm text-center" >KODE</td>
                                 <td className="text-sm text-center text-center" >NAMA KATEGORI</td>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>
-                                    <div className="flex flex-row" >
-                                        <button className="btn p-0" onClick={() => { location.href = "/home/edit/" + 1 }} ><BiPencil /></button>
-                                        <button className="btn p-0" ><BiTrash color="red" /></button>
-                                    </div>
-                                </td>
-                                <td>PM</td>
-                                <td>Perlengkapan Motor</td>
-                            </tr>
+                            {data?.map((item) => {
+                                return (
+                                    <tr key={item?.id} >
+                                        <td>1</td>
+                                        <td>
+                                            <div className="flex flex-row justify-center items-center w-100" >
+                                                <button className="btn p-0" onClick={() => { setSelectedItem(item); setIsEditOpen(true) }} ><BiPencil /></button>
+                                                <button onClick={() => handleDeleteData(item?.id)} className="btn p-0" ><BiTrash color="red" /></button>
+                                            </div>
+                                        </td>
+                                        <td>{item?.code || ""}</td>
+                                        <td>{item?.name || ""}</td>
+                                    </tr>
+                                )
+                            })}
+
                         </tbody>
                     </table>
                     <nav aria-label="Page navigation example">
@@ -114,13 +222,13 @@ export default function Category() {
                                 <div className="flex flex-col align-start">
                                     <label>Kode Kategori</label>
                                     <div className="input-group mb-3 max-h-20 max-w-50">
-                                        <input type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Kode Kategori" aria-label="" aria-describedby="basic-addon1" />
+                                        <input onChange={(e) => setNewData(prev => ({ ...prev, code: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Kode Kategori" aria-label="" aria-describedby="basic-addon1" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col align-start">
                                     <label>Nama Kategori</label>
                                     <div className="input-group mb-3 max-h-20 max-w-50">
-                                        <input type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Nama Kategori" aria-label="" aria-describedby="basic-addon1" />
+                                        <input onChange={(e) => setNewData(prev => ({ ...prev, name: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Nama Kategori" aria-label="" aria-describedby="basic-addon1" />
                                     </div>
                                 </div>
                             </div>
@@ -136,7 +244,72 @@ export default function Category() {
 
                                 <button
                                     className="btn btn-primary"
+                                    onClick={() => handleAddData()}
+                                >
+                                    Submit
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Modal Edit Category */}
+            {isEditOpen && (
+                <div
+                    className="modal show d-block"
+                    tabIndex={-1}
+                    role="dialog"
+                    onClick={() => setIsEditOpen(false)}
+                >
+                    <div
+                        className="modal-dialog modal-dialog-centered"
+                        role="document"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="modal-content">
+
+                            {/* Header */}
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    Form
+                                </h5>
+
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setIsEditOpen(false)}
+                                />
+                            </div>
+
+                            {/* Body */}
+                            <div className="modal-body">
+                                <div className="flex flex-col align-start">
+                                    <label>Kode Kategori</label>
+                                    <div className="input-group mb-3 max-h-20 max-w-50">
+                                        <input value={selectedItem?.code} onChange={(e) => setSelectedItem(prev => ({ ...prev, code: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Kode Kategori" aria-label="" aria-describedby="basic-addon1" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col align-start">
+                                    <label>Nama Kategori</label>
+                                    <div className="input-group mb-3 max-h-20 max-w-50">
+                                        <input value={selectedItem?.name}  onChange={(e) => setSelectedItem(prev => ({ ...prev, name: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Nama Kategori" aria-label="" aria-describedby="basic-addon1" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="modal-footer">
+                                <button
+                                    className="btn btn-secondary"
                                     onClick={() => setIsOpen(false)}
+                                >
+                                    Close
+                                </button>
+
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => handleEditData()}
                                 >
                                     Submit
                                 </button>
