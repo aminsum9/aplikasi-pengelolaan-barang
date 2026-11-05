@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import Image from "next/image";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -21,6 +21,9 @@ export default function Login() {
       });
 
       if(response.status == 200 || response.status == 201){
+        localStorage.setItem("token",response?.data?.data?.token)
+        localStorage.setItem("username",response?.data?.data?.username)
+        localStorage.setItem("name",response?.data?.data?.name)
         location.href = "/home"
       } else {
 
