@@ -26,7 +26,7 @@ export default function Sidebar() {
             <nav className="sidebar-menu">
                 {/* Barang Masuk */}
                 <Link
-                    href="/"
+                    href="/home"
                     className={`sidebar-item ${isActive('/home') ? 'active' : ''}`}
                 >
                     <div className='flex flex-row text-center items-center justify-center' >
@@ -53,16 +53,16 @@ export default function Sidebar() {
                 {dropdownOpen && (
                     <div className="sidebar-submenu">
                         <Link
-                            href="/master-data/kategori"
-                            className={`sidebar-subitem ${isActive('/master-data/kategori') ? 'active' : ''
+                            href="/master-data/category"
+                            className={`sidebar-subitem ${isActive('/master-data/category') ? 'active' : ''
                                 }`}
                         >
                             Kategori
                         </Link>
 
                         <Link
-                            href="/master-data/sub-kategori"
-                            className={`sidebar-subitem ${isActive('/master-data/sub-kategori') ? 'active' : ''
+                            href="/master-data/sub-category"
+                            className={`sidebar-subitem ${isActive('/master-data/sub-category') ? 'active' : ''
                                 }`}
                         >
                             Sub Kategori
@@ -72,8 +72,8 @@ export default function Sidebar() {
 
                 {/* Manajemen Users */}
                 <Link
-                    href="/manajemen-users"
-                    className={`sidebar-item ${isActive('/manajemen-users') ? 'active' : ''
+                    href="/management-users"
+                    className={`sidebar-item ${isActive('/management-users') ? 'active' : ''
                         }`}
                 >
                     <div className='flex flex-row items-center justify-center' >

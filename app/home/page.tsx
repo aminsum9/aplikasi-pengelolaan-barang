@@ -3,7 +3,7 @@
 import { useState } from "react"
 import FilterDropdown from "../components/ui/dropdown"
 import PageLayout from "../components/ui/page-layout"
-import { BsPen, BsPlus } from "react-icons/bs"
+import { BsPlus } from "react-icons/bs"
 import { BiPencil, BiSearch, BiTrash } from "react-icons/bi"
 import { FcDocument } from "react-icons/fc"
 
