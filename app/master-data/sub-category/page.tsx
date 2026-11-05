@@ -1,25 +1,170 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import FilterDropdown from "../../components/ui/dropdown"
 import PageLayout from "../../components/ui/page-layout"
 import { BsPlus } from "react-icons/bs"
 import { BiPencil, BiSearch, BiTrash } from "react-icons/bi"
 import { FcDocument } from "react-icons/fc"
+import axios from "axios"
 
 interface Item {
     value: string
     name: string
 }
 
-const dummyCategories: Item[] = [
-    { value: "1", name: "smartphone" },
-    { value: "2", name: "televisi" }
-]
+
+interface SubCategory {
+    id: number
+    category: string
+    name: string
+    price_limit: number
+}
+
+interface Category {
+    id: number
+    code: string
+    name: string
+}
 
 export default function SubCategory() {
+    const [categories, setDataCategory] = useState<Category[] | []>([])
+    const [data, setData] = useState<SubCategory[] | []>([])
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<SubCategory>({
+        id: 0,
+        category: "",
+        name: "",
+        price_limit: 0
+    })
+    const [newData, setNewData] = useState<{ category: string, name: string, price_limit: number }>({
+        category: "",
+        name: "",
+        price_limit: 0
+    })
+    const [page, setPage] = useState<number>(1)
+
+    const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("")
     const [selectedCategory, setSelectedCategory] = useState<string>("")
     const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        handleGetCategoryData()
+        handleGetData()
+    }, [])
+
+    async function handleGetCategoryData() {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.get(process.env.NEXT_PUBLIC_BASE_URL + "category/get-all?page=" + page, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                }
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                setDataCategory(response?.data?.data || [])
+            } else {
+
+            }
+        } catch (error: any) {
+            console.log("Error response:", error?.response);
+        }
+    }
+
+    async function handleGetData() {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.get(process.env.NEXT_PUBLIC_BASE_URL + "sub-category/get-all?page=" + page, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                }
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                setData(response?.data?.data || [])
+            } else {
+
+            }
+        } catch (error: any) {
+            console.log("Error response:", error?.response);
+        }
+    }
+
+    async function handleAddData() {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + "sub-category/add", {
+                category: selectedCategory,
+                name: newData?.name,
+                price_limit: newData?.price_limit,
+            }, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                },
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                handleGetData()
+                setIsOpen(false)
+                setNewData({ category: "", name: "", price_limit: 0 })
+            } else {
+
+            }
+        } catch (error: any) {
+            setIsOpen(false)
+            console.log("Error response:", error?.response);
+        }
+    }
+
+    async function handleEditData() {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.put(process.env.NEXT_PUBLIC_BASE_URL + "sub-category/update", {
+                id: selectedItem?.id,
+                category: selectedItem?.category,
+                name: selectedItem?.name,
+                price_limit: selectedItem?.price_limit,
+            }, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                },
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                handleGetData()
+                setIsEditOpen(false)
+                setSelectedItem({ id: 0, category: "", name: "", price_limit: 0 })
+            } else {
+
+            }
+        } catch (error: any) {
+            setIsOpen(false)
+            console.log("Error response:", error?.response);
+        }
+    }
+
+    async function handleDeleteData(id: number) {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.delete(process.env.NEXT_PUBLIC_BASE_URL + "sub-category/delete/" + id, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                },
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                handleGetData()
+                setIsOpen(false)
+            } else {
+
+            }
+        } catch (error: any) {
+            setIsOpen(false)
+            console.log("Error response:", error?.response);
+        }
+    }
+
 
     return (
         <PageLayout>
@@ -42,9 +187,9 @@ export default function SubCategory() {
                     <div className="flex flex-row align-start">
                         <FilterDropdown
                             defaultItem="Kategori"
-                            items={dummyCategories}
-                            selectedItem={selectedCategory}
-                            selectItem={(item) => setSelectedCategory(item)}
+                            items={categories?.map(i => ({ value: i.name, name: i.name } as Item))}
+                            selectedItem={selectedCategoryFilter}
+                            selectItem={(item) => setSelectedCategoryFilter(item)}
                             classes={"mr-2"}
                         />
 
@@ -60,23 +205,27 @@ export default function SubCategory() {
                             <td className="text-sm text-center" >NO</td>
                             <td className="text-sm text-center" >ACTION</td>
                             <td className="text-sm text-center" >KATEGORI BARANG</td>
-                            <td className="text-sm text-center text-center" >SUB KATEGORI BARANG</td>
-                            <td className="text-sm text-center text-center" >BATAS HARGA (RP.)</td>
+                            <td className="text-sm text-center" >SUB KATEGORI BARANG</td>
+                            <td className="text-sm text-center" >BATAS HARGA (RP.)</td>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>
-                                <div className="flex flex-row" >
-                                    <button className="btn p-0" onClick={() => { location.href = "/home/edit/" + 1 }} ><BiPencil /></button>
-                                    <button className="btn p-0" ><BiTrash color="red" /></button>
-                                </div>
-                            </td>
-                            <td>Perlengkapan Motor</td>
-                            <td>Kelistrikan Motor</td>
-                            <td>100000</td>
-                        </tr>
+                        {data?.map((item, index) => {
+                            return (
+                                <tr key={item?.id} >
+                                    <td>{index + 1}</td>
+                                    <td>
+                                        <div className="flex flex-row justify-center items-center" >
+                                            <button className="btn p-0" onClick={() => { setSelectedItem(item); setIsEditOpen(true) }} ><BiPencil /></button>
+                                            <button onClick={() => handleDeleteData(item?.id)} className="btn p-0" ><BiTrash color="red" /></button>
+                                        </div>
+                                    </td>
+                                    <td>{item?.category}</td>
+                                    <td>{item?.name}</td>
+                                    <td>{item?.price_limit}</td>
+                                </tr>
+                            )
+                        })}
                     </tbody>
                 </table>
                 <nav aria-label="Page navigation example">
@@ -122,7 +271,7 @@ export default function SubCategory() {
                                 <label>Kategori</label>
                                 <FilterDropdown
                                     defaultItem="Kategori"
-                                    items={dummyCategories}
+                                    items={categories?.map(i => ({ value: i.name, name: i.name } as Item))}
                                     selectedItem={selectedCategory}
                                     selectItem={(item) => setSelectedCategory(item)}
                                     classes={"mr-2"}
@@ -130,13 +279,13 @@ export default function SubCategory() {
                                 <div className="flex flex-col align-start">
                                     <label>Nama Sub Kategori</label>
                                     <div className="input-group mb-3 max-h-20 max-w-50">
-                                        <input type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Kode Kategori" aria-label="" aria-describedby="basic-addon1" />
+                                        <input value={newData?.name} onChange={(e) => setNewData(prev => ({ ...prev, name: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Kode Kategori" aria-label="" aria-describedby="basic-addon1" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col align-start">
                                     <label>Batas Harga</label>
                                     <div className="input-group mb-3 max-h-20 max-w-50">
-                                        <input type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Nama Kategori" aria-label="" aria-describedby="basic-addon1" />
+                                        <input value={newData?.price_limit} onChange={(e) => setNewData(prev => ({ ...prev, price_limit: parseInt(e.target.value || "0") }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Nama Kategori" aria-label="" aria-describedby="basic-addon1" />
                                     </div>
                                 </div>
                             </div>
@@ -152,7 +301,79 @@ export default function SubCategory() {
 
                                 <button
                                     className="btn btn-primary"
+                                    onClick={() => handleAddData()}
+                                >
+                                    Submit
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isEditOpen && (
+                <div
+                    className="modal show d-block"
+                    tabIndex={-1}
+                    role="dialog"
+                    onClick={() => setIsEditOpen(false)}
+                >
+                    <div
+                        className="modal-dialog modal-dialog-centered"
+                        role="document"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="modal-content">
+
+                            {/* Header */}
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    Form
+                                </h5>
+
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setIsEditOpen(false)}
+                                />
+                            </div>
+
+                            {/* Body */}
+                            <div className="modal-body">
+                                <label>Kategori</label>
+                                <FilterDropdown
+                                    defaultItem="Kategori"
+                                    items={categories?.map(i => ({ value: i.name, name: i.name } as Item))}
+                                    selectedItem={selectedCategory}
+                                    selectItem={(item) => setSelectedCategory(item)}
+                                    classes={"mr-2"}
+                                />
+                                <div className="flex flex-col align-start">
+                                    <label>Nama Sub Kategori</label>
+                                    <div className="input-group mb-3 max-h-20 max-w-50">
+                                        <input value={selectedItem?.name} onChange={(e) => setSelectedItem(prev => ({ ...prev, name: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Kode Kategori" aria-label="" aria-describedby="basic-addon1" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col align-start">
+                                    <label>Batas Harga</label>
+                                    <div className="input-group mb-3 max-h-20 max-w-50">
+                                        <input value={selectedItem?.price_limit} onChange={(e) => setSelectedItem(prev => ({ ...prev, price_limit: parseInt(e.target.value || "0") }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Nama Kategori" aria-label="" aria-describedby="basic-addon1" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="modal-footer">
+                                <button
+                                    className="btn btn-secondary"
                                     onClick={() => setIsOpen(false)}
+                                >
+                                    Close
+                                </button>
+
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => handleEditData()}
                                 >
                                     Submit
                                 </button>
