@@ -19,6 +19,7 @@ const dummyCategories: Item[] = [
 
 export default function SubCategory() {
     const [selectedCategory, setSelectedCategory] = useState<string>("")
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
         <PageLayout>
@@ -33,7 +34,7 @@ export default function SubCategory() {
             <div>
                 <div className="flex flex-row justify-between align-start" >
                     <div className="max-h-20 self-center" >
-                        <button onClick={() => { location.href = "/home/add" }} type="button" className="btn-main w-100 max-h-50 max-w-35 pt-1 pb-1 mt-0">
+                        <button onClick={() => setIsOpen(true)} type="button" className="btn-main w-100 max-h-50 max-w-35 pt-1 pb-1 mt-0">
                             <span className="flex flex-row pr-2 pl-2 pt-1 pb-1 text-center align-center" ><BsPlus size={20} />Tambah Data</span>
                         </button>
                     </div>
@@ -88,6 +89,81 @@ export default function SubCategory() {
                     </ul>
                 </nav>
             </div>
+            {/* Modal Add Category */}
+            {isOpen && (
+                <div
+                    className="modal show d-block"
+                    tabIndex={-1}
+                    role="dialog"
+                    onClick={() => setIsOpen(false)}
+                >
+                    <div
+                        className="modal-dialog modal-dialog-centered"
+                        role="document"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="modal-content">
+
+                            {/* Header */}
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    Form
+                                </h5>
+
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setIsOpen(false)}
+                                />
+                            </div>
+
+                            {/* Body */}
+                            <div className="modal-body">
+                                <label>Kategori</label>
+                                <FilterDropdown
+                                    defaultItem="Kategori"
+                                    items={dummyCategories}
+                                    selectedItem={selectedCategory}
+                                    selectItem={(item) => setSelectedCategory(item)}
+                                    classes={"mr-2"}
+                                />
+                                <div className="flex flex-col align-start">
+                                    <label>Nama Sub Kategori</label>
+                                    <div className="input-group mb-3 max-h-20 max-w-50">
+                                        <input type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Kode Kategori" aria-label="" aria-describedby="basic-addon1" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col align-start">
+                                    <label>Batas Harga</label>
+                                    <div className="input-group mb-3 max-h-20 max-w-50">
+                                        <input type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Nama Kategori" aria-label="" aria-describedby="basic-addon1" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="modal-footer">
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    Close
+                                </button>
+
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    Submit
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Backdrop */}
+            {isOpen && <div className="modal-backdrop show" />}
         </PageLayout>
     )
 }
