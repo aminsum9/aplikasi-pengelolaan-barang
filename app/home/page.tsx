@@ -3,8 +3,9 @@
 import { useState } from "react"
 import FilterDropdown from "../components/ui/dropdown"
 import PageLayout from "../components/ui/page-layout"
-import { BsPlus } from "react-icons/bs"
-import { BiSearch } from "react-icons/bi"
+import { BsPen, BsPlus } from "react-icons/bs"
+import { BiPencil, BiSearch, BiTrash } from "react-icons/bi"
+import { FcDocument } from "react-icons/fc"
 
 interface Item {
   value: string
@@ -24,14 +25,14 @@ export default function Home() {
       <nav aria-label="breadcrumb">
         <ol className="breadcrumb">
           <li className="breadcrumb-item active" aria-current="page">Home</li>
-          <li className="breadcrumb-item active" aria-current="page">Library</li>
+          <li className="breadcrumb-item active" aria-current="page">Barang Masuk</li>
         </ol>
       </nav>
       <h5>Barang Masuk</h5>
       <div>
         <div className="flex flex-row justify-between align-start" >
           <div className="max-h-20 self-center" >
-            <button onClick={() => { location.href = "/home" }} type="button" className="btn-main w-100 max-h-50 max-w-35 pt-1 pb-1 mt-0">
+            <button onClick={() => { location.href = "/home/add" }} type="button" className="btn-main w-100 max-h-50 max-w-35 pt-1 pb-1 mt-0">
               <span className="flex flex-row pr-2 pl-2 pt-1 pb-1 text-center align-center" ><BsPlus size={20} />Tambah Data</span>
             </button>
           </div>
@@ -67,24 +68,30 @@ export default function Home() {
         <table className="table table-striped table-bordered mt-5">
           <thead>
             <tr>
-              <td className="text-sm" >NO</td>
-              <td className="text-sm" >ACTION</td>
-              <td className="text-sm" >TANGGAL</td>
-              <td className="text-sm text-center" >ASAL BARANG</td>
-              <td className="text-sm" >PENERIMA</td>
-              <td className="text-sm" >UNIT</td>
-              <td className="text-sm" >KODE</td>
-              <td className="text-sm" >NAMA</td>
-              <td className="text-sm" >HARGA</td>
-              <td className="text-sm" >JUMLAH</td>
-              <td className="text-sm" >TOTAL(RP.)</td>
-              <td className="text-sm" >STATUS</td>
+              <td className="text-sm text-center" >NO</td>
+              <td className="text-sm text-center" >ACTION</td>
+              <td className="text-sm text-center" >TANGGAL</td>
+              <td className="text-sm text-center text-center" >ASAL BARANG</td>
+              <td className="text-sm text-center" >PENERIMA</td>
+              <td className="text-sm text-center" >UNIT</td>
+              <td className="text-sm text-center" >KODE</td>
+              <td className="text-sm text-center" >NAMA</td>
+              <td className="text-sm text-center" >HARGA</td>
+              <td className="text-sm text-center" >JUMLAH</td>
+              <td className="text-sm text-center" >TOTAL(RP.)</td>
+              <td className="text-sm text-center" >STATUS</td>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>1</td>
-              <td></td>
+              <td>
+                <div className="flex flex-row" >
+                  <button className="btn p-0" onClick={() => {location.href = "/home/edit/"+1}} ><BiPencil /></button>
+                  <button className="btn p-0" ><FcDocument /></button>
+                  <button className="btn p-0" ><BiTrash color="red" /></button>
+                </div>
+              </td>
               <td>19/05/2026</td>
               <td>Jakarta Utara</td>
               <td>Eko</td>

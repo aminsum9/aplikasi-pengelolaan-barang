@@ -15,7 +15,7 @@ export default function Sidebar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const pathname = usePathname();
 
-    const isActive = (path: string) => pathname === path;
+    const isActive = (path: string) => pathname.includes(path);
 
     return (
         <aside className="sidebar">
