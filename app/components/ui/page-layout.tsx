@@ -12,7 +12,9 @@ export default function PageLayout({children}: PageLayoutProps) {
         <Sidebar />
         <div className="flex flex-1 flex-col" >
           <Navbar />
-          {children}
+          <div className="p-4" >
+            {children}
+          </div>
         </div>
       </main>
     </div>
