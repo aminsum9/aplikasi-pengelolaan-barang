@@ -1,25 +1,115 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import FilterDropdown from "../components/ui/dropdown"
 import PageLayout from "../components/ui/page-layout"
 import { BsPlus } from "react-icons/bs"
 import { BiLock, BiPencil, BiSearch, BiTrash } from "react-icons/bi"
 import { FcDocument } from "react-icons/fc"
+import axios from "axios"
 
+interface User {
+    id: number
+    role: string
+    username: string
+    name: string
+    email: string
+}
 interface Item {
     value: string
     name: string
 }
 
-const dummyCategories: Item[] = [
-    { value: "1", name: "smartphone" },
-    { value: "2", name: "televisi" }
+const roles: Item[] = [
+    { value: "admin", name: "Admin" },
+    { value: "user", name: "User" }
 ]
 
 export default function SubCategory() {
-    const [selectedCategory, setSelectedCategory] = useState<string>("")
+    const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>("")
+    const [selectedRole, setSelectedRole] = useState<string>("")
     const [isOpen, setIsOpen] = useState(false);
+    const [newData, setNewData] = useState<{ role: string, username: string, name: string, email: string, password: string }>({
+        role: "",
+        username: "",
+        name: "",
+        email: "",
+        password: ""
+    })
+    const [data, setData] = useState<User[] | []>([])
+    const [page, setPage] = useState<number>(1)
+
+    useEffect(() => {
+        handleGetData()
+    }, [])
+
+    async function handleGetData() {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.get(process.env.NEXT_PUBLIC_BASE_URL + "user/get-all?page=" + page, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                }
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                setData(response?.data?.data || [])
+            } else {
+
+            }
+        } catch (error: any) {
+            console.log("Error response:", error?.response);
+        }
+    }
+
+    async function handleAddData() {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + "user/register", {
+                role: selectedRole,
+                username: newData?.username,
+                name: newData?.name,
+                email: newData?.email,
+                password: newData?.password,
+            }, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                },
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                handleGetData()
+                setIsOpen(false)
+                setNewData({ role: "", name: "", username: "", email: "", password: "" })
+            } else {
+
+            }
+        } catch (error: any) {
+            setIsOpen(false)
+            console.log("Error response:", error?.response);
+        }
+    }
+
+    async function handleDeleteData(id: number) {
+            try {
+                const apiToken = await localStorage.getItem("api_token")
+                const response = await axios.delete(process.env.NEXT_PUBLIC_BASE_URL + "user/delete/" + id, {
+                    headers: {
+                        Authorization: "Bearer " + apiToken
+                    },
+                });
+    
+                if (response.status == 200 || response.status == 201) {
+                    handleGetData()
+                    setIsOpen(false)
+                } else {
+    
+                }
+            } catch (error: any) {
+                setIsOpen(false)
+                console.log("Error response:", error?.response);
+            }
+        }
 
     return (
         <PageLayout>
@@ -42,9 +132,9 @@ export default function SubCategory() {
                     <div className="flex flex-row align-start">
                         <FilterDropdown
                             defaultItem="Semua Role"
-                            items={dummyCategories}
-                            selectedItem={selectedCategory}
-                            selectItem={(item) => setSelectedCategory(item)}
+                            items={roles}
+                            selectedItem={selectedRoleFilter}
+                            selectItem={(item) => setSelectedRoleFilter(item)}
                             classes={"mr-2"}
                         />
 
@@ -66,20 +156,25 @@ export default function SubCategory() {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>
-                                <div className="flex flex-row" >
-                                    <button className="btn p-0" onClick={() => { location.href = "/home/edit/" + 1 }} ><BiPencil /></button>
-                                    <button className="btn p-0" ><BiLock /></button>
-                                    <button className="btn p-0" ><BiTrash color="red" /></button>
-                                </div>
-                            </td>
-                            <td>admin123</td>
-                            <td>Admin</td>
-                            <td>admin@gmail.com</td>
-                            <td>Admin</td>
-                        </tr>
+                        {data?.map((item, index) => {
+                            return (
+                                <tr key={item.id} >
+                                    <td>{index + 1}</td>
+                                    <td>
+                                        <div className="flex flex-row justify-center items-center" >
+                                            <button className="btn p-0" onClick={() => { }} ><BiPencil /></button>
+                                            <button className="btn p-0" ><BiLock /></button>
+                                            <button onClick={() => handleDeleteData(item?.id)} className="btn p-0" ><BiTrash color="red" /></button>
+                                        </div>
+                                    </td>
+                                    <td>{item?.username}</td>
+                                    <td>{item?.name}</td>
+                                    <td>{item?.email}</td>
+                                    <td>{item?.role}</td>
+                                </tr>
+                            )
+                        })}
+
                     </tbody>
                 </table>
                 <nav aria-label="Page navigation example">
@@ -125,33 +220,33 @@ export default function SubCategory() {
                                 <label>Role</label>
                                 <FilterDropdown
                                     defaultItem="User"
-                                    items={dummyCategories}
-                                    selectedItem={selectedCategory}
-                                    selectItem={(item) => setSelectedCategory(item)}
+                                    items={roles}
+                                    selectedItem={selectedRole}
+                                    selectItem={(item) => setSelectedRole(item)}
                                     classes={"mr-2"}
                                 />
                                 <div className="flex flex-col align-start">
                                     <label>Username</label>
                                     <div className="input-group mb-3 max-h-20 max-w-50">
-                                        <input type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Username" aria-label="" aria-describedby="basic-addon1" />
+                                        <input value={newData?.username} onChange={(e) => setNewData(prev => ({ ...prev, username: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Username" aria-label="" aria-describedby="basic-addon1" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col align-start">
                                     <label>Password</label>
                                     <div className="input-group mb-3 max-h-20 max-w-50">
-                                        <input type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Password" aria-label="" aria-describedby="basic-addon1" />
+                                        <input value={newData?.password} onChange={(e) => setNewData(prev => ({ ...prev, password: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Password" aria-label="" aria-describedby="basic-addon1" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col align-start">
                                     <label>Nama</label>
                                     <div className="input-group mb-3 max-h-20 max-w-50">
-                                        <input type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Nama" aria-label="" aria-describedby="basic-addon1" />
+                                        <input value={newData?.name} onChange={(e) => setNewData(prev => ({ ...prev, name: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Nama" aria-label="" aria-describedby="basic-addon1" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col align-start">
                                     <label>Email</label>
                                     <div className="input-group mb-3 max-h-20 max-w-50">
-                                        <input type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Email" aria-label="" aria-describedby="basic-addon1" />
+                                        <input value={newData?.email} onChange={(e) => setNewData(prev => ({ ...prev, email: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Email" aria-label="" aria-describedby="basic-addon1" />
                                     </div>
                                 </div>
                             </div>
@@ -167,7 +262,7 @@ export default function SubCategory() {
 
                                 <button
                                     className="btn btn-primary"
-                                    onClick={() => setIsOpen(false)}
+                                    onClick={() => handleAddData()}
                                 >
                                     Submit
                                 </button>
