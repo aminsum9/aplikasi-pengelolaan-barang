@@ -1,36 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+1. 
+2. link video langkah-langkah menggunakan aplikasi: https://drive.google.com/drive/folders/1JOKYWT0kKj_ok9Zzu5iQ3YUoH5zhllOJ?usp=sharing
+3. Tech Stack Yang Digunakan
+  - Node.js v20.11.1
+  - Next.js
+4. Petunjuk Instalasi local
+  - gunakan atau download Node.js v20.11.1
+  - clone project FE: git clone https://github.com/aminsum9/aplikasi-pengelolaan-barang.git
+  - masuk ke project FE lalu jalankan: pnpm install
+  - setelah selesai jalankan: npm run dev
+  - masuk ke browser ke url: http://localhost:3000/
+5. Akun yang bisa dicoba:
+  - jika di server remote: 
+    - username: admin
+    - password: password123
+  - jika di server local bisa hit api untuk membuat akun dummy:
+    POST http://localhost:5000/user/register
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+    request body:
+    {
+        "role": "admin",
+        "username": "admin",
+        "name": "Admin",
+        "email": "admin@gmail.com",
+        "password": "password123"
+    }
