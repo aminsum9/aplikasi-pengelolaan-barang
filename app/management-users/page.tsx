@@ -28,7 +28,17 @@ const roles: Item[] = [
 export default function SubCategory() {
     const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>("")
     const [selectedRole, setSelectedRole] = useState<string>("")
-    const [isOpen, setIsOpen] = useState(false);
+    const [selectedEditRole, setSelectedEditRole] = useState<string>("")
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
+    const [selectedItem, setSelectedItem] = useState<{ id: number, role: string, username: string, name: string, email: string, password: string }>({
+        id: 0,
+        role: "",
+        username: "",
+        name: "",
+        email: "",
+        password: ""
+    })
     const [newData, setNewData] = useState<{ role: string, username: string, name: string, email: string, password: string }>({
         role: "",
         username: "",
@@ -90,26 +100,62 @@ export default function SubCategory() {
         }
     }
 
-    async function handleDeleteData(id: number) {
-            try {
-                const apiToken = await localStorage.getItem("api_token")
-                const response = await axios.delete(process.env.NEXT_PUBLIC_BASE_URL + "user/delete/" + id, {
-                    headers: {
-                        Authorization: "Bearer " + apiToken
-                    },
-                });
-    
-                if (response.status == 200 || response.status == 201) {
-                    handleGetData()
-                    setIsOpen(false)
-                } else {
-    
-                }
-            } catch (error: any) {
-                setIsOpen(false)
-                console.log("Error response:", error?.response);
+    async function handleEditData() {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.put(process.env.NEXT_PUBLIC_BASE_URL + "user/update", {
+                id: selectedItem?.id,
+                role: selectedEditRole,
+                username: selectedItem?.username,
+                name: selectedItem?.name,
+                email: selectedItem?.email,
+                password: selectedItem?.password
+            }, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                },
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                handleGetData()
+                setIsEditOpen(false)
+                setSelectedItem({
+                    id: 0,
+                    role: "",
+                    username: "",
+                    name: "",
+                    email: "",
+                    password: ""
+                })
+            } else {
+
             }
+        } catch (error: any) {
+            setIsOpen(false)
+            console.log("Error response:", error?.response);
         }
+    }
+
+    async function handleDeleteData(id: number) {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.delete(process.env.NEXT_PUBLIC_BASE_URL + "user/delete/" + id, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                },
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                handleGetData()
+                setIsOpen(false)
+            } else {
+
+            }
+        } catch (error: any) {
+            setIsOpen(false)
+            console.log("Error response:", error?.response);
+        }
+    }
 
     return (
         <PageLayout>
@@ -162,7 +208,18 @@ export default function SubCategory() {
                                     <td>{index + 1}</td>
                                     <td>
                                         <div className="flex flex-row justify-center items-center" >
-                                            <button className="btn p-0" onClick={() => { }} ><BiPencil /></button>
+                                            <button className="btn p-0" onClick={() => {
+                                                setSelectedItem({
+                                                    id: item?.id,
+                                                    role: item?.role,
+                                                    username: item?.username,
+                                                    name: item?.name,
+                                                    email: item?.email,
+                                                    password: "",
+                                                });
+                                                setIsEditOpen(true);
+                                                setSelectedEditRole(item?.role)
+                                            }} ><BiPencil /></button>
                                             <button className="btn p-0" ><BiLock /></button>
                                             <button onClick={() => handleDeleteData(item?.id)} className="btn p-0" ><BiTrash color="red" /></button>
                                         </div>
@@ -219,7 +276,7 @@ export default function SubCategory() {
                             <div className="modal-body">
                                 <label>Role</label>
                                 <FilterDropdown
-                                    defaultItem="User"
+                                    defaultItem="Pilih Role"
                                     items={roles}
                                     selectedItem={selectedRole}
                                     selectItem={(item) => setSelectedRole(item)}
@@ -272,8 +329,92 @@ export default function SubCategory() {
                     </div>
                 </div>
             )}
+            {isEditOpen && (
+                <div
+                    className="modal show d-block"
+                    tabIndex={-1}
+                    role="dialog"
+                    onClick={() => setIsEditOpen(false)}
+                >
+                    <div
+                        className="modal-dialog modal-dialog-centered"
+                        role="document"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="modal-content">
+
+                            {/* Header */}
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    Form
+                                </h5>
+
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setIsEditOpen(false)}
+                                />
+                            </div>
+
+                            {/* Body */}
+                            <div className="modal-body">
+                                <label>Role</label>
+                                <FilterDropdown
+                                    defaultItem="Pilih Role"
+                                    items={roles}
+                                    selectedItem={selectedEditRole}
+                                    selectItem={(item) => setSelectedEditRole(item)}
+                                    classes={"mr-2"}
+                                />
+                                <div className="flex flex-col align-start">
+                                    <label>Username</label>
+                                    <div className="input-group mb-3 max-h-20 max-w-50">
+                                        <input value={selectedItem?.username} onChange={(e) => setSelectedItem(prev => ({ ...prev, username: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Username" aria-label="" aria-describedby="basic-addon1" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col align-start">
+                                    <label>Password</label>
+                                    <div className="input-group mb-3 max-h-20 max-w-50">
+                                        <input value={selectedItem?.password} onChange={(e) => setSelectedItem(prev => ({ ...prev, password: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Password" aria-label="" aria-describedby="basic-addon1" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col align-start">
+                                    <label>Nama</label>
+                                    <div className="input-group mb-3 max-h-20 max-w-50">
+                                        <input value={selectedItem?.name} onChange={(e) => setSelectedItem(prev => ({ ...prev, name: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Nama" aria-label="" aria-describedby="basic-addon1" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col align-start">
+                                    <label>Email</label>
+                                    <div className="input-group mb-3 max-h-20 max-w-50">
+                                        <input value={selectedItem?.email} onChange={(e) => setSelectedItem(prev => ({ ...prev, email: e.target.value }))} type="text" className="form-control max-h-10 max-w-50 text-sm p-2" placeholder="Masukkan Email" aria-label="" aria-describedby="basic-addon1" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="modal-footer">
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => setIsEditOpen(false)}
+                                >
+                                    Close
+                                </button>
+
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => handleEditData()}
+                                >
+                                    Submit
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Backdrop */}
-            {isOpen && <div className="modal-backdrop show" />}
+            {(isOpen || isEditOpen) && <div className="modal-backdrop show" />}
         </PageLayout>
     )
 }
