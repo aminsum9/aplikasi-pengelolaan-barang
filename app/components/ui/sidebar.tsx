@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import "../../globals.css";
@@ -14,8 +14,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const BoxArrowInDownIcon: IconType = BsBoxArrowInDown
 
-export default function Sidebar() {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
+function Content() {
+    const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
     const pathname = usePathname();
 
     const isActive = (path: string) => pathname.includes(path);
@@ -87,4 +87,12 @@ export default function Sidebar() {
             </nav>
         </aside>
     );
+}
+
+export default function Sidebar() {
+    return(
+         <Suspense fallback={<div>Loading...</div>}>
+            <Content />
+         </Suspense>
+    )
 }
