@@ -6,10 +6,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import "../../globals.css";
 import { BsBoxArrowInDown } from 'react-icons/bs';
+import type {IconType} from 'react-icons';
 import { BiBookmark } from 'react-icons/bi';
 import { MdPeople } from 'react-icons/md';
 import { CgChevronDown, CgChevronUp } from 'react-icons/cg';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+const BoxArrowInDownIcon: IconType = BsBoxArrowInDown
 
 export default function Sidebar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -30,7 +33,7 @@ export default function Sidebar() {
                     className={`sidebar-item ${isActive('/home') ? 'active' : ''}`}
                 >
                     <div className='flex flex-row text-center items-center justify-center' >
-                        <BsBoxArrowInDown />
+                        <BoxArrowInDownIcon />
                         <p className='ml-2 mb-0' >Barang Masuk</p>
                     </div>
                 </Link>
