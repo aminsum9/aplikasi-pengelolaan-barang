@@ -1,4 +1,4 @@
-1. 
+1. link Aplikasi FE: https://aplikasi-pengelolaan-barang-remote.vercel.app/
 2. link video langkah-langkah menggunakan aplikasi: https://drive.google.com/drive/folders/1JOKYWT0kKj_ok9Zzu5iQ3YUoH5zhllOJ?usp=sharing
 3. Tech Stack Yang Digunakan
   - Node.js v20.11.1
