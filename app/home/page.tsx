@@ -1,11 +1,35 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import FilterDropdown from "../components/ui/dropdown"
 import PageLayout from "../components/ui/page-layout"
 import { BsPlus } from "react-icons/bs"
 import { BiPencil, BiSearch, BiTrash } from "react-icons/bi"
 import { FcDocument } from "react-icons/fc"
+import axios from "axios"
+
+interface Warehouse {
+    operator: string,
+    category: string,
+    sub_category: string,
+    price_limit: number,
+    origin: string,
+    number: string,
+    attachment: string,
+}
+
+interface Product {
+  id: number;
+  name: string;
+  category: string;
+  warehouse_number: string;
+  price: number;
+  amount: number;
+  unit: string;
+  total: number;
+  expired_date: string;
+  warehouse: Warehouse
+}
 
 interface Item {
   value: string
@@ -19,6 +43,31 @@ const dummyCategories: Item[] = [
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>("")
+  const [data, setData] = useState<Product[] | []>([])
+  const [page, setPage] = useState<number>(1)
+
+  useEffect(() => {
+    handleGetData()
+  }, [])
+
+  async function handleGetData() {
+    try {
+      const apiToken = await localStorage.getItem("api_token")
+      const response = await axios.get(process.env.NEXT_PUBLIC_BASE_URL + "product/get-all?page=" + page, {
+        headers: {
+          Authorization: "Bearer " + apiToken
+        }
+      });
+
+      if (response.status == 200 || response.status == 201) {
+        setData(response?.data?.data || [])
+      } else {
+
+      }
+    } catch (error: any) {
+      console.log("Error response:", error?.response);
+    }
+  }
 
   return (
     <PageLayout>
@@ -83,26 +132,31 @@ export default function Home() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>1</td>
-              <td>
-                <div className="flex flex-row" >
-                  <button className="btn p-0" onClick={() => {location.href = "/home/edit/"+1}} ><BiPencil /></button>
-                  <button className="btn p-0" ><FcDocument /></button>
-                  <button className="btn p-0" ><BiTrash color="red" /></button>
-                </div>
-              </td>
-              <td>19/05/2026</td>
-              <td>Jakarta Utara</td>
-              <td>Eko</td>
-              <td>50</td>
-              <td>TYDS</td>
-              <td>Sepeda Motor</td>
-              <td>20000000</td>
-              <td>200</td>
-              <td>4000000000</td>
-              <td>Selesai</td>
-            </tr>
+            {data?.map((item, index) => {
+              return(
+                <tr key={item?.id} >
+                  <td>{index + 1}</td>
+                  <td>
+                    <div className="flex flex-row" >
+                      <button className="btn p-0" onClick={() => { location.href = "/home/edit/" + 1 }} ><BiPencil /></button>
+                      <button className="btn p-0" ><FcDocument /></button>
+                      <button className="btn p-0" ><BiTrash color="red" /></button>
+                    </div>
+                  </td>
+                  <td></td>
+                  <td>{item?.warehouse?.origin || "-"}</td>
+                  <td>{item?.warehouse?.operator || "-"}</td>
+                  <td>{item?.unit}</td>
+                  <td>{"-"}</td>
+                  <td>{item?.name}</td>
+                  <td>{item?.price}</td>
+                  <td>{item?.amount}</td>
+                  <td>{item?.total}</td>
+                  <td>{"-"}</td>
+                </tr>
+              )
+            })}
+            
           </tbody>
         </table>
         <nav aria-label="Page navigation example">
