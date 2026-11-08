@@ -1,25 +1,22 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import FilterDropdown from "../../components/ui/dropdown"
 import PageLayout from "../../components/ui/page-layout"
-import { BsPlus } from "react-icons/bs"
-import { BiArrowBack, BiCross, BiSearch } from "react-icons/bi"
-import { FaCross } from "react-icons/fa6"
-import { FiDelete } from "react-icons/fi"
-import { CgCross } from "react-icons/cg"
+import { BiArrowBack} from "react-icons/bi"
 import { ImCross, ImPlus } from "react-icons/im"
-import { LuPlus } from "react-icons/lu"
+import axios from "axios"
 
 interface Item {
     value: string
     name: string
 }
 
-const dummyCategories: Item[] = [
-    { value: "1", name: "smartphone" },
-    { value: "2", name: "televisi" }
-]
+interface Category {
+    id: number
+    code: string
+    name: string
+}
 
 interface TableRow {
     id: number;
@@ -43,7 +40,64 @@ const createEmptyRow = (id: number): TableRow => ({
 
 
 export default function AddProduct() {
+    const [categories, setCategories] = useState<Item[]>([])
     const [selectedCategory, setSelectedCategory] = useState<string>("")
+    const [subCategories, setSubCategory] = useState<Item[]>([])
+    const [selectedSubCategory, setSelectedSubCategory] = useState<string>("")
+    const [newData, setNewData] = useState<{ code: string, name: string }>({
+        code: "",
+        name: ""
+    })
+
+    useEffect(() => {
+        handleGetCategory()
+    }, [])
+
+    async function handleGetCategory() {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.get(process.env.NEXT_PUBLIC_BASE_URL + "category/get-all-no-limit", {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                }
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                const dataCategories = response?.data?.data as Category[];
+
+                const data: Item[] = dataCategories?.map(item => {return {value: item?.name, name: item?.name } as Item})
+
+                setCategories(data|| [])
+            } else {
+
+            }
+        } catch (error: any) {
+            console.log("Error response:", error?.response);
+        }
+    }
+
+    async function handleGetSubCategory(category: string) {
+        try {
+            const apiToken = await localStorage.getItem("api_token")
+            const response = await axios.get(process.env.NEXT_PUBLIC_BASE_URL + "sub-category/get-all-no-limit?category=" + category, {
+                headers: {
+                    Authorization: "Bearer " + apiToken
+                }
+            });
+
+            if (response.status == 200 || response.status == 201) {
+                const dataCategories = response?.data?.data as Category[];
+
+                const data: Item[] = dataCategories?.map(item => {return {value: item?.name, name: item?.name } as Item})
+
+                setSubCategory(data || [])
+            } else {
+
+            }
+        } catch (error: any) {
+            console.log("Error response:", error?.response);
+        }
+    }
 
     const [rows, setRows] = useState<TableRow[]>([
         createEmptyRow(1),
@@ -91,29 +145,25 @@ export default function AddProduct() {
                             <div className="flex flex-row justify-between align-start" >
                                 <div className="flex flex-col align-start">
                                     <label>Operator</label>
-                                    <FilterDropdown
-                                        defaultItem="Semua Kategori"
-                                        items={dummyCategories}
-                                        selectedItem={selectedCategory}
-                                        selectItem={(item) => setSelectedCategory(item)}
-                                        classes={"mr-2"}
-                                    />
+                                    <div className="input-group mb-3 max-h-20 max-w-63">
+                                        <input type="text" className="form-control max-h-10 max-w-63 text-sm p-2" placeholder="Contoh: Budi" aria-label="" aria-describedby="basic-addon1" />
+                                    </div>
                                     <label>Kategori</label>
                                     <FilterDropdown
-                                        defaultItem="Semua Sub Kategori"
-                                        items={dummyCategories}
+                                        defaultItem="Pilih Kategori"
+                                        items={categories}
                                         selectedItem={selectedCategory}
-                                        selectItem={(item) => setSelectedCategory(item)}
+                                        selectItem={(item) => {setSelectedCategory(item); handleGetSubCategory(item)}}
                                         classes={"mr-2"}
                                     />
                                     <div className="flex flex-row" >
                                         <div>
                                             <label>Sub Kategori</label>
                                             <FilterDropdown
-                                                defaultItem="Semua Tahun"
-                                                items={dummyCategories}
-                                                selectedItem={selectedCategory}
-                                                selectItem={(item) => setSelectedCategory(item)}
+                                                defaultItem="Pilih Sub Kategori"
+                                                items={subCategories}
+                                                selectedItem={selectedSubCategory}
+                                                selectItem={(item) => setSelectedSubCategory(item)}
                                                 classes={"mr-2 min-w-100"}
                                             />
                                         </div>
